@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>index</title>
+  <style media="screen">
+    *{
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+</body>
+</html>
+
+<script type="text/javascript" src="js/three.js-master/build/three.js"></script>
+
+
+<!-- <script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script> -->
+
+
+<script type="text/javascript">
+
+
+var camera, scene, renderer;
+var geometry, material, mesh;
+
+init();
+animate();
+
+function init() {
+
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.z = 1000;
+
+  scene = new THREE.Scene();
+
+  // instantiate a loader http://stackoverflow.com/q/20433474
+  loader = new THREE.JSONLoader();
+          loader.load('res/human1.json',function jsonReady( geometry )
+          {
+              mesh = new THREE.SkinnedMesh( geometry, new THREE.MeshNormalMaterial({skinning : true}) );
+              mesh.scale.set( 50, 50, 50 );
+              mesh.position.z = mesh.position.y = mesh.position.x = 0;
+              mesh.translateY(-400);
+              mesh.geometry.dynamic = true;
+              scene.add( mesh );
+
+              var index = 0;
+              for (var i = 0; i < mesh.skeleton.bones.length; i++)
+              {
+                // console.log(mesh.skeleton.bones[i]);
+
+              }
+
+
+
+
+              renderer.render(scene, camera);
+          });
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  document.body.appendChild(renderer.domElement);
+
+}
+
+function animate() {
+
+  requestAnimationFrame(animate);
+
+  mesh.rotation.y += 0.1;
+  // human.rotation.y += 0.02;
+
+  renderer.render(scene, camera);
+
+}
+
+
+// load ascii model
+
+// var jsonLoader = new THREE.JSONLoader();
+// jsonLoader.load( "res/human.js", createScene );
+
+// load binary model
+
+// var binLoader = new THREE.BinaryLoader();
+// binLoader.load( "res/human.js", createScene );
+//
+// function createScene( geometry, materials ) {
+//
+//     var mesh = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
+//
+// }
+
+// LISTENER
+document.onkeydown = function(e) {
+    e = e || window.event;
+    switch(e.which || e.keyCode) {
+
+      case 37: // left
+              break;
+
+              case 38: // up
+              console.log("up");
+              mesh.skeleton.bones[4].scale.set(1, 1, 1);
+              break;
+
+              case 39: // right
+              break;
+
+              case 40: // down
+              console.log("down");
+              mesh.skeleton.bones[4].scale.set(2, 1, 2);
+              break;
+
+              case 32: // space
+              console.log("space");
+              break;
+              default: return; // exit this handler for other keys
+          }
+          e.preventDefault(); // prevent the default action (scroll / move caret)
+      }
+
+
+
+</script>
