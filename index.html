@@ -60,7 +60,7 @@ document.onkeydown = function(e) {
 var camera, scene, renderer;
 var geometry, material, mesh;
 var mouse, raycaster;
-
+var cubes = [];
 init();
 animate();
 
@@ -76,20 +76,60 @@ function init() {
 
   // instantiate a loader http://stackoverflow.com/q/20433474
   loader = new THREE.JSONLoader();
-  loader.load('res/human1.json',function jsonReady( geometry )
-  {
+  loader.load('res/human2.json',function jsonReady( geometry ){
     mesh = new THREE.SkinnedMesh( geometry, new THREE.MeshNormalMaterial({skinning : true}) );
+    // mesh = new THREE.SkinnedMesh( geometry, new  THREE.MeshLambertMaterial({color: 0xffffff, skinning : true}));
     mesh.scale.set( 50, 50, 50 );
     mesh.position.z = mesh.position.y = mesh.position.x = 0;
     mesh.translateY(-400);
     mesh.geometry.dynamic = true;
     scene.add( mesh );
 
-    var index = 0;
-    for (var i = 0; i < mesh.skeleton.bones.length; i++)
-    {
-      // console.log(mesh.skeleton.bones[i]);
+    for (var i = 0; i < mesh.skeleton.bones.length; i++) {
+      var cube = new THREE.Mesh( new THREE.CubeGeometry( 2, 2, 2 ), new THREE.MeshNormalMaterial({ transparent: true, opacity: 0}) );
+      cube.name = mesh.skeleton.bones[i].name + "_cube";
+      var bone_pos = mesh.skeleton.bones[i].position;
+      cube.position.set( bone_pos.x, bone_pos.y, bone_pos.z );
+      cubes.push(cube);
+    }
 
+
+    for (var i = 0; i < cubes.length; i++) {
+      if (i != 0) {//dont render root bone
+        mesh.add(cubes[i]);
+      }
+    }
+    // adjust collider positions
+    for (var i = 0; i < cubes.length; i++) {
+        switch (cubes[i].name) {
+          case "head_cube":
+            cubes[i].position.y += 1;
+            break;
+          case "neck_cube":
+            cubes[i].position.y += 1;
+            break;
+          case "chest_cube":
+            cubes[i].position.y += 1;
+            break;
+          case "stomach_cube":
+            cubes[i].position.y += 3;
+            cubes[i].position.z -= 4;
+            break;
+          case "tight_r_cube":
+            cubes[i].position.y -= 1;
+            break;
+          case "tight_l_cube":
+            cubes[i].position.y -= 1;
+            break;
+          case "calve_r_cube":
+            cubes[i].position.y -= 1;
+            break;
+          case "calve_l_cube":
+            cubes[i].position.y -= 1;
+            break;
+          default:
+
+        }
     }
 
     renderer.render(scene, camera);
@@ -106,6 +146,7 @@ function init() {
 function animate() {
   requestAnimationFrame(animate);
   mesh.rotation.y += 0.01;
+
   renderer.render(scene, camera);
 }
 
@@ -116,22 +157,9 @@ function onDocumentMouseDown( event ) {
 
 				raycaster.setFromCamera( mouse, camera );
 
-				var intersects = raycaster.intersectObjects( [mesh] );
+				var intersects = raycaster.intersectObjects( cubes );
 
-        console.log(intersects[0]);
-
-        var hehe = intersects[0].object.parent;
-        document.getElementById('output').innerHTML = JSON.stringify(hehe, null, 2);
-
-
-				/*
-				// Parse all the faces
-				for ( var i in intersects ) {
-
-					intersects[ i ].face.material[ 0 ].color.setHex( Math.random() * 0xffffff | 0x80000000 );
-
-				}
-				*/
+        console.log(intersects[0].object.name);
 			}
 
 
