@@ -2,21 +2,21 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>index</title>
+  <title>KALUA</title>
   <style media="screen">
-    *{
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
-    }
+  *{
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+  }
   </style>
 </head>
 <body>
-
+<pre id="output"></pre>
 </body>
 </html>
 
-<script type="text/javascript" src="js/three.js-master/build/three.js"></script>
+<script type="text/javascript" src="js/three.js"></script>
 
 
 <!-- <script src="//cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script> -->
@@ -25,8 +25,41 @@
 <script type="text/javascript">
 
 
+// LISTENER
+document.onkeydown = function(e) {
+  e = e || window.event;
+  switch(e.which || e.keyCode) {
+
+    case 37: // left
+    mesh.skeleton.bones[3].scale.set(2, 1, 2);
+    break;
+
+    case 38: // up
+    console.log("up");
+    mesh.skeleton.bones[4].scale.set(1, 1, 1);
+    break;
+
+    case 39: // right
+    mesh.skeleton.bones[3].scale.set(1, 1, 1);
+    break;
+
+    case 40: // down
+    console.log("down");
+    mesh.skeleton.bones[4].scale.set(2, 1, 2);
+    break;
+
+    case 32: // space
+    console.log("space");
+    break;
+    default: return; // exit this handler for other keys
+  }
+  e.preventDefault(); // prevent the default action (scroll / move caret)
+}
+
+
 var camera, scene, renderer;
 var geometry, material, mesh;
+var mouse, raycaster;
 
 init();
 animate();
@@ -35,32 +68,32 @@ function init() {
 
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
   camera.position.z = 1000;
-
   scene = new THREE.Scene();
+
+  raycaster = new THREE.Raycaster();
+	mouse = new THREE.Vector2();
+  document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
   // instantiate a loader http://stackoverflow.com/q/20433474
   loader = new THREE.JSONLoader();
-          loader.load('res/human1.json',function jsonReady( geometry )
-          {
-              mesh = new THREE.SkinnedMesh( geometry, new THREE.MeshNormalMaterial({skinning : true}) );
-              mesh.scale.set( 50, 50, 50 );
-              mesh.position.z = mesh.position.y = mesh.position.x = 0;
-              mesh.translateY(-400);
-              mesh.geometry.dynamic = true;
-              scene.add( mesh );
+  loader.load('res/human1.json',function jsonReady( geometry )
+  {
+    mesh = new THREE.SkinnedMesh( geometry, new THREE.MeshNormalMaterial({skinning : true}) );
+    mesh.scale.set( 50, 50, 50 );
+    mesh.position.z = mesh.position.y = mesh.position.x = 0;
+    mesh.translateY(-400);
+    mesh.geometry.dynamic = true;
+    scene.add( mesh );
 
-              var index = 0;
-              for (var i = 0; i < mesh.skeleton.bones.length; i++)
-              {
-                // console.log(mesh.skeleton.bones[i]);
+    var index = 0;
+    for (var i = 0; i < mesh.skeleton.bones.length; i++)
+    {
+      // console.log(mesh.skeleton.bones[i]);
 
-              }
+    }
 
-
-
-
-              renderer.render(scene, camera);
-          });
+    renderer.render(scene, camera);
+  });
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,62 +102,41 @@ function init() {
 
 }
 
+
 function animate() {
-
   requestAnimationFrame(animate);
-
-  mesh.rotation.y += 0.1;
-  // human.rotation.y += 0.02;
-
+  mesh.rotation.y += 0.01;
   renderer.render(scene, camera);
-
 }
 
+function onDocumentMouseDown( event ) {
+				event.preventDefault();
+				mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
 
-// load ascii model
+				raycaster.setFromCamera( mouse, camera );
 
-// var jsonLoader = new THREE.JSONLoader();
-// jsonLoader.load( "res/human.js", createScene );
+				var intersects = raycaster.intersectObjects( [mesh] );
 
-// load binary model
+        console.log(intersects[0]);
 
-// var binLoader = new THREE.BinaryLoader();
-// binLoader.load( "res/human.js", createScene );
-//
-// function createScene( geometry, materials ) {
-//
-//     var mesh = new THREE.Mesh( geometry, new THREE.MultiMaterial( materials ) );
-//
-// }
+        var hehe = intersects[0].object.parent;
+        document.getElementById('output').innerHTML = JSON.stringify(hehe, null, 2);
 
-// LISTENER
-document.onkeydown = function(e) {
-    e = e || window.event;
-    switch(e.which || e.keyCode) {
 
-      case 37: // left
-              break;
+				/*
+				// Parse all the faces
+				for ( var i in intersects ) {
 
-              case 38: // up
-              console.log("up");
-              mesh.skeleton.bones[4].scale.set(1, 1, 1);
-              break;
+					intersects[ i ].face.material[ 0 ].color.setHex( Math.random() * 0xffffff | 0x80000000 );
 
-              case 39: // right
-              break;
+				}
+				*/
+			}
 
-              case 40: // down
-              console.log("down");
-              mesh.skeleton.bones[4].scale.set(2, 1, 2);
-              break;
 
-              case 32: // space
-              console.log("space");
-              break;
-              default: return; // exit this handler for other keys
-          }
-          e.preventDefault(); // prevent the default action (scroll / move caret)
-      }
+
+
 
 
 
