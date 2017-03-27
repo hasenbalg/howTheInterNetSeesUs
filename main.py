@@ -44,7 +44,7 @@ def make_csv():
     output = output.rstrip(',') + "\n"
     for row in matrix:
         # first column
-        output += body_parts[x].replace("+"," ") + ","
+        output += body_parts[x].replace("+","_") + ","
         x += 1
         for value in row:
             output += str(value) + ","

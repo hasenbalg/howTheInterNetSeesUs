@@ -8,11 +8,20 @@
     padding: 0;
     margin: 0;
     overflow: hidden;
+    color: white;
+    font-family: monospace;
+  }
+  #current_body_part{
+    position: fixed;
+bottom: 2em;
+left: 2em;
   }
   </style>
 </head>
 <body>
-  <pre id="output"></pre>
+<div id="current_body_part">
+  Click on a part of the body to see how many google results it got in combination with all the other body parts.
+</div>
 </body>
 </html>
 
@@ -164,6 +173,7 @@ function onDocumentMouseDown( event ) {
     console.log(intersects[0].object.name.replace(collider_suffix, "").replace("_r", "").replace("_l", ""));
     scale_bones(intersects[0].object.name.replace(collider_suffix, "").replace("_r", "").replace("_l", "")); // remove collider_suffix and side marker
   }else { //reset all scale factors
+    display_chosen_body_part("reset");
     for (var i = 0; i < mesh.skeleton.bones.length; i++) {
       mesh.skeleton.bones[i].scale.set(1,1,1);
     }
@@ -171,6 +181,8 @@ function onDocumentMouseDown( event ) {
 }
 
 function scale_bones(reference_bone){
+  console.log(reference_bone);
+  display_chosen_body_part(reference_bone);
   //read csv file
   var path = "result.csv";
   var search_res_num ={};
@@ -217,12 +229,14 @@ function scale_bones(reference_bone){
         for (var scale in scales) {
           for (var i = 0; i < mesh.skeleton.bones.length; i++) {
             var bone_name = mesh.skeleton.bones[i].name;
+            // console.log(bone_name);
+            // console.log(scale);
             if (bone_name.includes(scale)) {
               var scale_factor = Number(scales[scale]);
               if (scale_factor < 1) {
                 scale_factor+=1;
               }
-              console.log(mesh.skeleton.bones[i].name + " scale_factor: " + scale_factor);
+              // console.log(mesh.skeleton.bones[i].name + " scale_factor: " + scale_factor);
               mesh.skeleton.bones[i].scale.set(scale_factor,scale_factor,scale_factor);
             }
           }
@@ -232,6 +246,10 @@ function scale_bones(reference_bone){
     };
     xhttp.open("GET", path, true);
     xhttp.send();
+}
+
+function display_chosen_body_part(name) {
+  document.getElementById('current_body_part').innerHTML = name;
 }
 
 
