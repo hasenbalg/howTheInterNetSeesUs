@@ -12,7 +12,7 @@
   </style>
 </head>
 <body>
-<pre id="output"></pre>
+  <pre id="output"></pre>
 </body>
 </html>
 
@@ -23,7 +23,6 @@
 
 
 <script type="text/javascript">
-
 
 // LISTENER
 document.onkeydown = function(e) {
@@ -60,6 +59,7 @@ document.onkeydown = function(e) {
 var camera, scene, renderer;
 var geometry, material, mesh;
 var mouse, raycaster;
+var collider_suffix = "_cube";
 var cubes = [];
 init();
 animate();
@@ -71,7 +71,7 @@ function init() {
   scene = new THREE.Scene();
 
   raycaster = new THREE.Raycaster();
-	mouse = new THREE.Vector2();
+  mouse = new THREE.Vector2();
   document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
   // instantiate a loader http://stackoverflow.com/q/20433474
@@ -87,7 +87,7 @@ function init() {
 
     for (var i = 0; i < mesh.skeleton.bones.length; i++) {
       var cube = new THREE.Mesh( new THREE.CubeGeometry( 2, 2, 2 ), new THREE.MeshNormalMaterial({ transparent: true, opacity: 0}) );
-      cube.name = mesh.skeleton.bones[i].name + "_cube";
+      cube.name = mesh.skeleton.bones[i].name + collider_suffix;
       var bone_pos = mesh.skeleton.bones[i].position;
       cube.position.set( bone_pos.x, bone_pos.y, bone_pos.z );
       cubes.push(cube);
@@ -101,35 +101,35 @@ function init() {
     }
     // adjust collider positions
     for (var i = 0; i < cubes.length; i++) {
-        switch (cubes[i].name) {
-          case "head_cube":
-            cubes[i].position.y += 1;
-            break;
-          case "neck_cube":
-            cubes[i].position.y += 1;
-            break;
-          case "chest_cube":
-            cubes[i].position.y += 1;
-            break;
-          case "stomach_cube":
-            cubes[i].position.y += 3;
-            cubes[i].position.z -= 4;
-            break;
-          case "tight_r_cube":
-            cubes[i].position.y -= 1;
-            break;
-          case "tight_l_cube":
-            cubes[i].position.y -= 1;
-            break;
-          case "calve_r_cube":
-            cubes[i].position.y -= 1;
-            break;
-          case "calve_l_cube":
-            cubes[i].position.y -= 1;
-            break;
-          default:
+      switch (cubes[i].name) {
+        case "head" + collider_suffix:
+        cubes[i].position.y += 1;
+        break;
+        case "neck" + collider_suffix:
+        cubes[i].position.y += 1;
+        break;
+        case "chest" + collider_suffix:
+        cubes[i].position.y += 1;
+        break;
+        case "stomach" + collider_suffix:
+        cubes[i].position.y += 3;
+        cubes[i].position.z -= 4;
+        break;
+        case "tight_r" + collider_suffix:
+        cubes[i].position.y -= 1;
+        break;
+        case "tight_l" + collider_suffix:
+        cubes[i].position.y -= 1;
+        break;
+        case "calve_r" + collider_suffix:
+        cubes[i].position.y -= 1;
+        break;
+        case "calve_l" + collider_suffix:
+        cubes[i].position.y -= 1;
+        break;
+        default:
 
-        }
+      }
     }
 
     renderer.render(scene, camera);
@@ -151,17 +151,88 @@ function animate() {
 }
 
 function onDocumentMouseDown( event ) {
-				event.preventDefault();
-				mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-				mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+  event.preventDefault();
+  mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
 
-				raycaster.setFromCamera( mouse, camera );
+  raycaster.setFromCamera( mouse, camera );
 
-				var intersects = raycaster.intersectObjects( cubes );
+  var intersects = raycaster.intersectObjects( cubes );
 
-        console.log(intersects[0].object.name);
-			}
+  if (intersects.length > 0) {
+    console.log(intersects[0].object.name);
+    console.log(intersects[0].object.name.replace(collider_suffix, "").replace("_r", "").replace("_l", ""));
+    scale_bones(intersects[0].object.name.replace(collider_suffix, "").replace("_r", "").replace("_l", "")); // remove collider_suffix and side marker
+  }else { //reset all scale factors
+    for (var i = 0; i < mesh.skeleton.bones.length; i++) {
+      mesh.skeleton.bones[i].scale.set(1,1,1);
+    }
+  }
+}
 
+function scale_bones(reference_bone){
+  //read csv file
+  var path = "result.csv";
+  var search_res_num ={};
+      var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        csv = this.responseText;
+        var lines = csv.split('\n');
+        var body_parts = lines[0].split(',');
+        // find relevant line and generate JSON
+        // shoulder: "459000000", head: "0", stomach: "79000000", neck: "316000000", lower_arm: "22300000", upper_arm: "5450000", hand: "855000000", chest: "130000000", thight: "181000000", foot: "258000000",
+        for(var i = 0;i < lines.length;i++){
+          if (lines[i].startsWith(reference_bone)) {
+            console.log(lines[i].split(','));
+            for (var j = 0; j < lines[i].split(',').length; j++) {
+              if (body_parts[j] != "") {
+                search_res_num[body_parts[j]] = lines[i].split(',')[j];
+              }
+            }
+          }
+        }
+        console.log(search_res_num);
+
+        // calculate scale factors for bones
+        var data = search_res_num;
+        var sum_results = 0;
+        for (var value in data) {
+          sum_results += Number(data[value]);
+        }
+
+        var scales = JSON.parse(JSON.stringify(data));
+        for (var value in scales) {
+          if (scales[value] == 0) {
+            scales[value] = 1;
+          }else{
+            scales[value] = scales[value]/sum_results;
+          }
+        }
+        console.log(scales);
+
+        // set scale factors for bones
+
+
+        for (var scale in scales) {
+          for (var i = 0; i < mesh.skeleton.bones.length; i++) {
+            var bone_name = mesh.skeleton.bones[i].name;
+            if (bone_name.includes(scale)) {
+              var scale_factor = Number(scales[scale]);
+              if (scale_factor < 1) {
+                scale_factor+=1;
+              }
+              console.log(mesh.skeleton.bones[i].name + " scale_factor: " + scale_factor);
+              mesh.skeleton.bones[i].scale.set(scale_factor,scale_factor,scale_factor);
+            }
+          }
+        }
+      }
+
+    };
+    xhttp.open("GET", path, true);
+    xhttp.send();
+}
 
 
 

@@ -1,41 +1,31 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
 
-  </body>
+</body>
 </html>
 
 <script type="text/javascript">
-// LISTENER
-document.onkeydown = function(e) {
-  e = e || window.event;
-  switch(e.which || e.keyCode) {
 
-    case 37: // left
-    break;
 
-    case 38: // up
-    console.log("up");
-    mesh.skeleton.bones[4].scale.set(1, 1, 1);
-    break;
-
-    case 39: // right
-    break;
-
-    case 40: // down
-    console.log("down");
-    mesh.skeleton.bones[4].scale.set(2, 1, 2);
-    break;
-
-    case 32: // space
-    console.log("space");
-    break;
-    default: return; // exit this handler for other keys
-  }
-  e.preventDefault(); // prevent the default action (scroll / move caret)
+var data = { shoulder: "266000000", head: "693000000", stomach: "80400000", neck: "345000000", lower_arm: "21100000", upper_arm: "7160000", hand: "0", chest: "163000000", thight: "5180000", foot: "25300000"}
+var sum_results = 0;
+for (var value in data) {
+  sum_results += Number(data[value]);
 }
+
+var scales = JSON.parse(JSON.stringify(data));
+for (var value in scales) {
+  if (scales[value] == 0) {
+    scales[value] = 1;
+  }else{
+    scales[value] = scales[value]/sum_results;
+  }
+}
+console.log(scales);
+
 </script>

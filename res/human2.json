@@ -66,7 +66,7 @@
         "parent":-1,
         "rotq":[0,0,0,1]
     },{
-        "name":"tight_r",
+        "name":"thight_r",
         "pos":[0.915641,8.40156,-0.415955],
         "parent":-1,
         "rotq":[0,0,0,1]
@@ -81,7 +81,7 @@
         "parent":-1,
         "rotq":[0,0,0,1]
     },{
-        "name":"tight_l",
+        "name":"thight_l",
         "pos":[-0.901855,8.40156,-0.415955],
         "parent":-1,
         "rotq":[0,0,0,1]

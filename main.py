@@ -2,11 +2,26 @@ import urllib
 import urllib2
 import re
 
-body_parts = ("kopf", "hals", "schulter", "oberarm", "unterarm", "hand", "brust", "bauch", "ruecken", "huefte", "oberschenkel", "unterschenkel", "fuss")
-# body_parts = ("kopf", "hals")
-len(body_parts)
+# body_parts = ("kopf", "hals", "schulter", "oberarm", "unterarm", "hand", "brust", "bauch", "ruecken", "huefte", "oberschenkel", "unterschenkel", "fuss")
+# len(body_parts)
 
 # matrix = [len(body_parts)][len(body_parts)]
+
+
+def extract_body_parts_from_3d_file(path):
+    import json
+    body_parts = []
+    with open(path) as data_file:
+        data = json.load(data_file)
+    data = data["bones"]
+    for bone in data:
+        if bone["name"] != "root":
+            name = bone["name"].replace("_l", "").replace("_r", "").replace("_", "+")
+            body_parts.append(name)
+    body_parts = list(set(body_parts)) #remove duplicats
+    return body_parts;
+
+body_parts = extract_body_parts_from_3d_file("res/human2.json")
 matrix = [[0 for x in range(len(body_parts))] for y in range(len(body_parts))]
 
 def write_to_file(text):
@@ -24,12 +39,12 @@ def make_csv():
     x = 0
     # table head
     for body_part in body_parts:
-        output += body_part + ","
+        output += body_part.replace("+","_") + ","
     # ditch last comma and add a line break
     output = output.rstrip(',') + "\n"
     for row in matrix:
         # first column
-        output += body_parts[x] + ","
+        output += body_parts[x].replace("+"," ") + ","
         x += 1
         for value in row:
             output += str(value) + ","
