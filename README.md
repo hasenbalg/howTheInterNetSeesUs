@@ -1,7 +1,8 @@
 
 
 # howTheInterNetSeesUs
-![Screenshot](Screenshot 2017-03-28 at 10.12.12.png)
+![Screenshot](Screenshot_2017-03-28_at_10.12.12.png)
+
 A visualization to deform a human body according to a matrix of Google search results of combinations of search terms related to the human body.
 
 ## User Stories
